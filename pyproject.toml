@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "habit-tracker"
+version = "0.1.0"
+description = ""
+authors = ["Constantine Putilov <putilov.constantine@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "4.2"
+django-rest-framework = "^0.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
