@@ -39,16 +39,22 @@ class HabitSerializer(serializers.ModelSerializer):
             Action.objects.create(habit=habit, **action)
         return habit
 
-    def update(self, instance, validated_data):
+    def update(self, instance: Habit, validated_data):
         instance.place = validated_data.get("place", instance.place)
         instance.is_nice = validated_data.get("is_nice", instance.is_nice)
         instance.related_habit = validated_data.get(
             "related_habit", instance.related_habit
         )
-        instance.periodicity = validated_data.get("periodicity", instance.periodicity)
+        instance.periodicity = validated_data.get(
+            "periodicity",
+            instance.periodicity
+        )
         instance.reward = validated_data.get("reward", instance.reward)
         instance.time = validated_data.get("time", instance.time)
-        instance.is_public = validated_data.get("is_public", instance.is_public)
+        instance.is_public = validated_data.get(
+            "is_public",
+            instance.is_public
+        )
 
         actions_data = validated_data.get("actions", [])
         instance.actions.all().delete()

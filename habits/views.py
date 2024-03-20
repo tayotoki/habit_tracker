@@ -12,32 +12,37 @@ from .viewsets_mixins import catch_db_constraints, paginate
 @extend_schema(tags=["Habits"])
 @catch_db_constraints
 class HabitViewSet(viewsets.ModelViewSet):
-    queryset = Habit.objects.all()
     serializer_class = HabitSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = (
+            Habit.objects
+            .prefetch_related("actions")
+            .select_related("related_habit")
+        )
 
         match self.action:
             case self.list.__name__:
                 queryset = (
-                    queryset.filter(user=self.request.user)
-                    .select_related("related_habit", "user")
-                    .prefetch_related("actions")
+                    queryset
+                    .filter(user=self.request.user)
+                    .select_related("user")
                 )
             case self.public_habits.__name__:
                 queryset = (
-                    queryset.public()
-                    .select_related("user", "related_habit")
-                    .prefetch_related("actions")
+                    queryset
+                    .public()
+                    .select_related("user")
                 )
             case self.retrieve.__name__:
                 queryset = (
-                    queryset.filter(user=self.request.user, pk=self.kwargs["pk"])
-                    .prefetch_related("actions")
-                    .select_related("related_habit")
+                    queryset
+                    .filter(
+                        user=self.request.user,
+                        pk=self.kwargs["pk"]
+                    )
                 )
 
         return queryset

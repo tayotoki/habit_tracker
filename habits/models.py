@@ -75,7 +75,12 @@ class Habit(models.Model):
     is_public = models.BooleanField(verbose_name="Публичный доступ", default=False)
 
     def __str__(self) -> str:
-        return f"{self.id} | {self.user} | {'Полезная' if not self.is_nice else 'Приятная'} | {self.periodicity} дн."
+        return (
+            f"{self.id} "
+            f"| {self.user}"
+            f"| {'Полезная' if not self.is_nice else 'Приятная'}"
+            f"| {self.periodicity} дн."
+        )
 
     class Meta:
         verbose_name = "Привычка"
