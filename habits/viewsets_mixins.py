@@ -1,6 +1,7 @@
 import functools
 
 from django.db import IntegrityError
+from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -20,6 +21,10 @@ CONSTRAINTS = {constraint.name: constraint for constraint in constraints}
 
 
 def try_handle(method):
+    """
+    Проверка методов на нарушение ограничений БД
+    """
+
     @functools.wraps(method)
     def wrapper(viewset, *args, **kwargs):
         if method.__name__ in viewset.CATCH_IN:
@@ -46,8 +51,8 @@ def catch_db_constraints(viewset):
     Обработка ограничений модели из БД.
     """
 
-    class ViewSetCls(viewset):
-        CATCH_IN = ["create", "update", "partial_update"]
+    class ViewSetMixin(viewset):
+        CATCH_IN: list[str] = ["create", "update", "partial_update"]
 
         @try_handle
         def create(self, *args, **kwargs):
@@ -61,4 +66,22 @@ def catch_db_constraints(viewset):
         def partial_update(self, *args, **kwargs):
             return viewset.update(self, *args, **kwargs)
 
-    return ViewSetCls
+    return ViewSetMixin
+
+
+def paginate(func):
+
+    @functools.wraps(func)
+    def inner(self, *args, **kwargs):
+        queryset = func(self, *args, **kwargs)
+        assert isinstance(queryset, (list, QuerySet))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    return inner

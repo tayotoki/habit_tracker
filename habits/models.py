@@ -1,16 +1,22 @@
 from datetime import timedelta
 from django.db import models
 from django.db.models import Q, CheckConstraint
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from users.models import User
 
 from .constants import HabitPeriodicity
+from .querysets import HabitsQuerySet
 
 
 class Action(models.Model):
+    """
+    Действия для привычек
+    """
+
     name = models.CharField("Название действия")
     description = models.TextField(
-        "Описание привычки", null=True, blank=True, help_text="Можно оставить пустым"
+        "Описание действия", null=True, blank=True, help_text="Можно оставить пустым"
     )
     habit = models.ForeignKey(
         "Habit",
@@ -28,6 +34,12 @@ class Action(models.Model):
 
 
 class Habit(models.Model):
+    """
+    Привычка
+    """
+
+    objects = HabitsQuerySet.as_manager()
+
     user = models.ForeignKey(
         User,
         verbose_name="Пользователь",
@@ -46,17 +58,24 @@ class Habit(models.Model):
     )
     periodicity = models.PositiveSmallIntegerField(
         verbose_name="Периодичность",
-        choices=HabitPeriodicity.choices,
         default=HabitPeriodicity.DAY,
+        validators=[
+            MinValueValidator(HabitPeriodicity.DAY),
+            MaxValueValidator(HabitPeriodicity.WEEK),
+        ],
     )
     reward = models.CharField(
         verbose_name="Награда", max_length=128, null=True, blank=True
     )
-    time = models.DurationField(verbose_name="Время на выполнение", default=timedelta())
+    time = models.DurationField(
+        verbose_name="Время на выполнение",
+        default=timedelta(),
+        validators=[MaxValueValidator(timedelta(seconds=120))],
+    )
     is_public = models.BooleanField(verbose_name="Публичный доступ", default=False)
 
     def __str__(self) -> str:
-        return f"{self.id} | {self.user} | {'Полезная' if not self.is_nice else 'Приятная'} | {self.get_periodicity_display()}"
+        return f"{self.id} | {self.user} | {'Полезная' if not self.is_nice else 'Приятная'} | {self.periodicity} дн."
 
     class Meta:
         verbose_name = "Привычка"
