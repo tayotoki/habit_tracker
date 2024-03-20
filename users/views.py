@@ -30,7 +30,10 @@ class UserViewSet(mixins.CreateModelMixin, GenericViewSet):
         username = request.data.get("username")
         password = request.data.get("password")
 
-        user = authentication.authenticate(username=username, password=password)
+        user = authentication.authenticate(
+            username=username,
+            password=password
+        )
 
         if user is not None:
             login(request, user)
@@ -53,7 +56,8 @@ class UserViewSet(mixins.CreateModelMixin, GenericViewSet):
     def logout(self, request):
         logout(request)
         return Response(
-            {"success": "User logged out successfully"}, status=status.HTTP_200_OK
+            {"success": "User logged out successfully"},
+            status=status.HTTP_200_OK
         )
 
     @only_register_action

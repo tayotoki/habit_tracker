@@ -1,12 +1,15 @@
 from rest_framework import viewsets
+from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
-from drf_spectacular.utils import extend_schema
+from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 from .serializers import HabitSerializer
 from .models import Habit
 from .viewsets_mixins import catch_db_constraints, paginate
+from .tasks import habits_notify
 
 
 @extend_schema(tags=["Habits"])
@@ -55,3 +58,22 @@ class HabitViewSet(viewsets.ModelViewSet):
         """
 
         return self.get_queryset()
+
+    @extend_schema(request=None, responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response={"detail": "Notify is sending"},
+                description="Отправка произошла успешно",
+            ),
+        })
+    @action(detail=False, methods=["POST"])
+    def notify_user(self, request, *args, **kwargs):
+        """
+        Уведомление пользователя на стороннем сервисе
+        """
+
+        habits_notify.delay(request.user.username)
+
+        return Response(
+            {"detail": "Notify is sending"},
+            status=status.HTTP_200_OK
+        )

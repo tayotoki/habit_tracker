@@ -16,7 +16,10 @@ class Action(models.Model):
 
     name = models.CharField("Название действия")
     description = models.TextField(
-        "Описание действия", null=True, blank=True, help_text="Можно оставить пустым"
+        "Описание действия",
+        null=True,
+        blank=True,
+        help_text="Можно оставить пустым"
     )
     habit = models.ForeignKey(
         "Habit",
@@ -72,7 +75,10 @@ class Habit(models.Model):
         default=timedelta(),
         validators=[MaxValueValidator(timedelta(seconds=120))],
     )
-    is_public = models.BooleanField(verbose_name="Публичный доступ", default=False)
+    is_public = models.BooleanField(
+        verbose_name="Публичный доступ",
+        default=False
+    )
 
     def __str__(self) -> str:
         return (
@@ -88,7 +94,10 @@ class Habit(models.Model):
         constraints = [
             # если is_nice=True, то related_habit должен быть null
             CheckConstraint(
-                check=Q(is_nice=True, related_habit__isnull=True) | Q(is_nice=False),
+                check=(
+                    Q(is_nice=True, related_habit__isnull=True)
+                    | Q(is_nice=False)
+                ),
                 name="habit_nice_no_related_habit",
                 violation_error_message=(
                     "У приятной привычки не может быть "
