@@ -14,12 +14,12 @@ def habits_notify(username):
     habits_qs = (
         Habit.objects
         .filter(user__username=username)
-        .prefetch_related("actions")
-        .select_related("related_habit", "related_habit__actions")
+        .select_related("related_habit")
+        .prefetch_related("actions", "related_habit__actions")
         .useful()
     )
 
-    message = "Ваши полезные привычки:\n"
+    message = "Ваши полезные привычки:\n\n"
 
     for habit in habits_qs:
         reward = (
@@ -30,6 +30,7 @@ def habits_notify(username):
             f"Место: {habit.place}\n"
             f"Периодичность: {habit.periodicity} дн.\n"
             f"Время выполнения: {habit.time}\n"
+            f"Действия: {[action.name for action in habit.actions.all()]}\n"
             f"Награда: {reward}\n"
             f"\n"
         )
