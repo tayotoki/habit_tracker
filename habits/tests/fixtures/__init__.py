@@ -1,0 +1,1 @@
+from .habits_fixtures import good_habits_fixture, bad_habits_fixture

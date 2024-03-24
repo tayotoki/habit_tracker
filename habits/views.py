@@ -2,7 +2,7 @@ from rest_framework import viewsets
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
@@ -10,6 +10,7 @@ from .serializers import HabitSerializer
 from .models import Habit
 from .viewsets_mixins import catch_db_constraints, paginate
 from .tasks import habits_notify
+from .pagination import CustomPageNumberPagination
 
 
 @extend_schema(tags=["Habits"])
@@ -17,7 +18,7 @@ from .tasks import habits_notify
 class HabitViewSet(viewsets.ModelViewSet):
     serializer_class = HabitSerializer
     permission_classes = (IsAuthenticated,)
-    pagination_class = LimitOffsetPagination
+    pagination_class = CustomPageNumberPagination
 
     def get_queryset(self):
         queryset = (

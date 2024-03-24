@@ -2,11 +2,12 @@ from celery import shared_task
 
 from .models import Habit
 from .services import TelegramBotService
+from .utils import configure_telegram_message
 
 
 @shared_task
 def habits_remind():
-    print("Habbit remind was sended")
+    print("Habit remind was sended")
 
 
 @shared_task
@@ -19,21 +20,7 @@ def habits_notify(username):
         .useful()
     )
 
-    message = "Ваши полезные привычки:\n\n"
-
-    for habit in habits_qs:
-        reward = (
-            [action.name for action in habit.related_habit.actions.all()]
-            if habit.related_habit else habit.reward
-        )
-        message += (
-            f"Место: {habit.place}\n"
-            f"Периодичность: {habit.periodicity} дн.\n"
-            f"Время выполнения: {habit.time}\n"
-            f"Действия: {[action.name for action in habit.actions.all()]}\n"
-            f"Награда: {reward}\n"
-            f"\n"
-        )
+    message = configure_telegram_message(habits=habits_qs)
 
     service = TelegramBotService(username=username)
 

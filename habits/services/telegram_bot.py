@@ -48,7 +48,8 @@ class TelegramBotService:
 
     def send_message(self, message):
         chat_id = (
-            chat_id if (chat_id := self.user.chat_id) else self.BASIC_CHAT_ID
+            chat_id if (chat_id := self.user.chat_id)
+            else self.BASIC_CHAT_ID
         )
 
         data = {

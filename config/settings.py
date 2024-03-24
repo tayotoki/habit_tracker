@@ -1,5 +1,8 @@
+import os
+
 from envparse import env
 from pathlib import Path
+from sys import argv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ENV_FILE = BASE_DIR / ".env"
@@ -10,8 +13,9 @@ if ENV_FILE.exists():
 LOGS_DIR = BASE_DIR / ".logs"
 
 SECRET_KEY = env("SECRET_KEY")
+TESTING = "test" in argv or any("pytest" in arg for arg in argv)
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "True") == "True" and not TESTING
 
 API_DOCS_ENABLE = env("API_DOCS_ENABLE")
 
@@ -130,18 +134,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = "/s/"
 STATIC_ROOT = BASE_DIR / "static"
 
 MEDIA_URL = "/m/"
 MEDIA_ROOT = BASE_DIR / "media"
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
