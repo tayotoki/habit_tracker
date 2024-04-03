@@ -4,8 +4,9 @@ from envparse import env
 from pathlib import Path
 from sys import argv
 
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 BASE_DIR = Path(__file__).resolve().parent.parent
-ENV_FILE = BASE_DIR / ".env"
+ENV_FILE = ROOT_DIR / ".env"
 
 if ENV_FILE.exists():
     env.read_envfile(ENV_FILE)
@@ -15,7 +16,7 @@ LOGS_DIR = BASE_DIR / ".logs"
 SECRET_KEY = env("SECRET_KEY")
 TESTING = "test" in argv or any("pytest" in arg for arg in argv)
 
-DEBUG = os.getenv("DEBUG", "True") == "True" and not TESTING
+DEBUG = env.bool("DEBUG", default=True) is True and not TESTING
 
 API_DOCS_ENABLE = env("API_DOCS_ENABLE")
 
